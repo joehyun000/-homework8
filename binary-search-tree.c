@@ -178,8 +178,13 @@ int insert(Node* head, int key) {    // 노드 삽입 함수 (1은 성공, 0은 
 
 
 int deleteLeafNode(Node* head, int key) {                      // leaf 노드 삭제 함수
-    Node* parentNode = NULL;                                   // 부모 노드를 NULL로 초기화
-    Node* searchNode = head;                                   // 현재 노드를 트리의 head로 초기화
+    if (head == NULL || head->left == NULL) {                  // 트리가 비어있거나 루트 노드가 없는 경우
+        printf("삭제할 노드가 없습니다.\n");
+        return 0;
+    }
+
+    Node* parentNode = head;
+    Node* searchNode = head->left;                             // 현재 노드를 트리의 루트로 초기화
 
     while (searchNode != NULL && searchNode->key != key) {     // 현재 노드가 NULL이 아니고 key값이 일치하지 않는 경우 반복
         parentNode = searchNode;                               // 부모 노드에 현재 노드 저장
@@ -191,20 +196,17 @@ int deleteLeafNode(Node* head, int key) {                      // leaf 노드 �
     }
 
     if (searchNode == NULL) {                                  // 트리를 다 순회했음에도 key값을 찾지 못한 경우
-        printf("삭제할 노드가 없습니다.\n");                
+        printf("삭제할 노드가 없습니다.\n");
         return 0;
     }
 
     if (searchNode->left == NULL && searchNode->right == NULL) {    // key값에 해당하는 노드가 leaf 노드인 경우
-        if (searchNode == head) {                                   // key 값에 해당하는 노드가 head 노드인 경우
-            free(searchNode);                                       // 그 해당 노드를 free
-            return 1;
-        }
-
         if (parentNode->left == searchNode) {                        // key 값에 해당하는 노드가 부모 노드의 왼쪽 자식 노드인 경우
-            parentNode->left = NULL;        				         // 부모 노드의 왼쪽 자식 노드를 NULL로 변경 
-        } else {                                                     // key 값에 해당하는 노드가 부모 노드의 오른쪽 자식 노드인 경우
+            parentNode->left = NULL;                                 // 부모 노드의 왼쪽 자식 노드를 NULL로 변경 
+        } else if (parentNode->right == searchNode) {                // key 값에 해당하는 노드가 부모 노드의 오른쪽 자식 노드인 경우
             parentNode->right = NULL;                                // 부모 노드의 오른쪽 자식 노드를 NULL로 변경
+        } else {                                                     // 루트 노드인 경우
+            head->left = NULL;
         }
         free(searchNode);                                            // 해당 노드를 free
         return 1;
@@ -213,6 +215,7 @@ int deleteLeafNode(Node* head, int key) {                      // leaf 노드 �
         return 0;
     }
 }
+
 
 Node* searchRecursive(Node* ptr, int key) {                           // 재귀적으로 노드를 검색하여 찾는 함수
     if (ptr == NULL || ptr->key == key)  {                            // 노드가 NULL이거나 key값이 일치하는 경우
