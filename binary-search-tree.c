@@ -240,17 +240,17 @@ Node* searchIterative(Node* head, int key) {                          // while�
 }
 
 int freeBST(Node* head) {                   // 트리의 모든 노드를 free시키는 함수
-     if (head == NULL) {
+     if (head == NULL) {                    // 트리가 비어있는 경우
         return 0;
     }
-    if (head->left != NULL) {
-        freeBST(head->left);
+    if (head->left != NULL) {               // 왼쪽 서브트리가 존재하는 경우
+        freeBST(head->left);                // 재귀적으로 왼쪽 서브트리를 순회하도록 함수 호출
     }
-    if (head->right != head) {
-        freeBST(head->right);
+    if (head->right != head) {              // 오른쪽 서브트리가 존재하는 경우
+        freeBST(head->right);               // 재귀적으로 오른쪽 서브트리를 순회하도록 함수 호출
     }
-    free(head);
-    return 1;                           // head 노드를 free시키고 성공 반환
+    free(head);                          //// head 노드 free
+    return 1;                           
 }
 
 
