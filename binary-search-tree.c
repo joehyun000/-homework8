@@ -21,7 +21,7 @@ int initializeBST(Node** h);
 void inorderTraversal(Node* ptr);
 void preorderTraversal(Node* ptr);
 void postorderTraversal(Node* ptr);
-int insert(Node** head, int key);
+int insert(Node* head, int key);
 int deleteLeafNode(Node* head, int key);
 Node* searchRecursive(Node* ptr, int key);
 Node* searchIterative(Node* head, int key);
@@ -60,7 +60,7 @@ int main()
             case 'n': case 'N':
                 printf("Your Key = ");
                 scanf("%d", &key);
-                insert(&head, key);
+                insert(head, key);
                 break;
             case 'd': case 'D':
                 printf("Your Key = ");
@@ -86,13 +86,13 @@ int main()
                     printf("\n Cannot find the node [%d]\n", key);
                 break;
             case 'i': case 'I':
-                inorderTraversal(head);
+                inorderTraversal(head->left);
                 break;
             case 'p': case 'P':
-                preorderTraversal(head);
+                preorderTraversal(head->left);
                 break;
             case 't': case 'T':
-                postorderTraversal(head);
+                postorderTraversal(head->left);
                 break;
             default:
                 printf("\n       >>>>>   Concentration!!   <<<<<     \n");
@@ -104,13 +104,17 @@ int main()
 }
 
 int initializeBST(Node** h) {
-    /* if the tree is not empty, then remove all allocated nodes from the tree */
-    if(*h != NULL)
-        freeBST(*h);
 
-    /* create a head node */
-    *h = NULL;  // 트리의 헤드를 NULL로 설정하여 초기화하는 것으로 코드 변경
-    return 1;
+	/* if the tree is not empty, then remove all allocated nodes from the tree*/
+	if(*h != NULL)
+		freeBST(*h);
+
+	/* create a head node */
+	*h = (Node*)malloc(sizeof(Node));
+	(*h)->left = NULL;	/* root */
+	(*h)->right = *h;
+	(*h)->key = -9999;
+	return 1;
 }
 
 
@@ -138,39 +142,38 @@ void postorderTraversal(Node* ptr) {      // 후위 순회
     }
 }
 
-int insert(Node* head, int key) {    //노드 삽입 함수 (1은 성공, 0은 실패)
+int insert(Node* head, int key) {    // 노드 삽입 함수 (1은 성공, 0은 실패)
     Node* newNode = (Node*)malloc(sizeof(Node));
+
     newNode->key = key;
     newNode->left = newNode->right = NULL;
 
-    if (head == NULL) {          // 트리가 비어있는 경우
-        head = newNode;          // 트리의 헤드에 새 노드 추가
+    if (head->left == NULL) {
+        head->left = newNode; // 트리가 비어있다면 새로운 노드를 루트로 설정
         return 1;
     }
 
-    Node* searchNode = head;    
+    Node* parentNode = NULL;
+    Node* searchNode = head->left; // 루트 노드부터 시작
 
-    while (searchNode) {                      // 트리가 비어있지 않은 경우 반복
-        if (key == searchNode->key) {         // 이미 같은 key값이 존재하는 경우
-            free(newNode);                    // 새 노드를 free
-            return 1;
-        } else if (key < searchNode->key) {   // 새 노드의 key값이 현재 노드의 key값보다 작은 경우  
-            if (searchNode->left == NULL) {   // 현재 노드의 왼쪽 자식 노드가 비어있는 경우
-                searchNode->left = newNode;   // 현재 노드의 왼쪽 자식 노드에 새 노드 추가
-                return 1;
-            } else {
-                searchNode = searchNode->left;    // 현재 노드를 현재 노드의 왼쪽 자식 노드로 변경
-            }
-        } else {                                  // 새 노드의 key값이 현재 노드의 key값보다 큰 경우
-            if (searchNode->right == NULL) {      // 현재 노드의 오른쪽 자식 노드가 비어있는 경우
-                searchNode->right = newNode;      // 현재 노드의 오른쪽 자식 노드에 새 노드 추가
-                return 1;
-            } else {
-                searchNode = searchNode->right;   // 현재 노드를 현재 노드의 오른쪽 자식 노드로 변경
-            }
+    while (searchNode) {
+        if(searchNode->key == key) { // 이미 같은 key값이 존재하는 경우
+            printf("이미 중복된 값이 존재합니다.\n");
+            free(newNode); // 새 노드를 free시킴
+            return 0; // 중복된 값이므로 실패 반환
         }
+        parentNode = searchNode; // 부모 노드 갱신
+        searchNode = (key < searchNode->key) ? searchNode->left : searchNode->right; // 새 노드의 key값이 현재 노드의 key값보다 작으면 왼쪽, 크면 오른쪽으로 이동
     }
-    return 0;
+
+    // 새로운 노드를 부모 노드의 왼쪽 또는 오른쪽에 삽입
+    if (key < parentNode->key) {
+        parentNode->left = newNode;
+    } else {
+        parentNode->right = newNode;
+    }
+
+    return 1; // 삽입 성공
 }
 
 
@@ -237,14 +240,17 @@ Node* searchIterative(Node* head, int key) {                          // while�
 }
 
 int freeBST(Node* head) {                   // 트리의 모든 노드를 free시키는 함수
-    if (head == NULL) {                     // 트리가 비어있는 경우
-		return 0;
-	}
-    freeBST(head->left);                    // 왼쪽 서브트리를 순회하도록 재귀적인 방법으로 함수 호출
-    freeBST(head->right);                   // 오른쪽 서브트리를 순회하도록 재귀적인 방법으로 함수 호출
-
-    free(head);                             // head 노드를 free
-    return 1;
+     if (head == NULL) {
+        return 0;
+    }
+    if (head->left != NULL) {
+        freeBST(head->left);
+    }
+    if (head->right != head) {
+        freeBST(head->right);
+    }
+    free(head);
+    return 1;                           // head 노드를 free시키고 성공 반환
 }
 
 
